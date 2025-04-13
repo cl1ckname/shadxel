@@ -51,7 +51,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 	center := float32(grid.Size) / 2
 	bounds := float32(grid.Size) * scale
 	model := mgl32.Scale3D(bounds/2, bounds/2, bounds/2) // scale from unit cube to voxel bounds
-	lightDir := view.Inv().Mul4x1(mgl32.Vec4{0.1, -0.1, 0.7, 0}.Normalize()).Vec3()
+	lightDir := mgl32.Vec3{0.1, -0.1, 0.7}.Normalize()
 
 	r.wirecube.Draw(r.shader, mgl32.Vec3{1, 1, 1}, model) // white cube
 
