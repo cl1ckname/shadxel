@@ -79,6 +79,7 @@ func (a *App) Run() {
 	running := true
 	var frame int
 
+	grid := a.engine.GenerateGrid(50, frame)
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
@@ -99,19 +100,14 @@ func (a *App) Run() {
 		}
 		select {
 		case <-ticker.C:
-			gl.Viewport(0, 0, 1600, 1200) // or update this dynamically on resize
-			gl.ClearColor(0.9, 0.9, 0.9, 1.0)
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			grid := a.engine.GenerateGrid(50, frame)
-
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-			view := a.camera.ViewMatrix()
-			a.renderer.Draw(grid, view, projection)
-			a.window.GLSwap()
+			grid = a.engine.GenerateGrid(50, frame)
 			frame++
 		default:
 			// Avoid maxing CPU
 			sdl.Delay(1)
 		}
+		view := a.camera.ViewMatrix()
+		a.renderer.Draw(grid, view, projection)
+		a.window.GLSwap()
 	}
 }

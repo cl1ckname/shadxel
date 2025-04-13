@@ -1,26 +1,8 @@
 function voxel(x, y, z, t)
-	local size = 25
-	x = x - size
-	y = y - size
-	z = z - size
-	local min = -size
-	local max = size
-
-	-- Check if we're on the surface of the cube
-	local on_x_edge = (x == min or x == max)
-	local on_y_edge = (y == min or y == max)
-	local on_z_edge = (z == min or z == max)
-
-	-- Count how many coordinates are on the border
-	local edge_count = 0
-	if on_x_edge then edge_count = edge_count + 1 end
-	if on_y_edge then edge_count = edge_count + 1 end
-	if on_z_edge then edge_count = edge_count + 1 end
-
-	-- A voxel is part of an edge if exactly 2 coordinates are at border
-	if edge_count == 2 then
-		return 200, 255, 255 -- bright cyan for edges
+	local d = x * x + y * y + z * z
+	if d < (75 + math.sin(2 * math.pi / 10 * t) * 10) then
+		local sp = 100 * math.sin(2 * math.pi / 100 * t)
+		return 100 + sp, 150 - sp, 200
 	end
-
 	return 0, 0, 0
 end

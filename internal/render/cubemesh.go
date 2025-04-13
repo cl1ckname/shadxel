@@ -26,11 +26,12 @@ func NewCubeMesh() *CubeMesh {
 	return &CubeMesh{vao: vao}
 }
 
-func (c *CubeMesh) DrawAt(shader ShaderProgram, color mgl32.Vec3, model mgl32.Mat4) {
+func (c *CubeMesh) DrawAt(shader ShaderProgram, color, light mgl32.Vec3, model mgl32.Mat4) {
 	gl.UseProgram(shader.ID)
 
 	gl.BindVertexArray(c.vao)
 	gl.Uniform3f(gl.GetUniformLocation(shader.ID, gl.Str("color\x00")), color.X(), color.Y(), color.Z())
+	gl.Uniform3f(gl.GetUniformLocation(shader.ID, gl.Str("worldLightDir\x00")), light.X(), light.Y(), light.Z())
 	gl.UniformMatrix4fv(gl.GetUniformLocation(shader.ID, gl.Str("model\x00")), 1, false, &model[0])
 	gl.DrawArrays(gl.TRIANGLES, 0, 36)
 }

@@ -97,12 +97,13 @@ in vec3 Normal;
 
 out vec4 FragColor;
 
+uniform vec3 worldLightDir;
 uniform vec3 color;
 
 void main() {
-    vec3 lightDir = normalize(vec3(0.7, 0.5, 0.3)); // light direction
-    float diff = max(dot(normalize(Normal), lightDir), 0.0);
-    vec3 shadedColor = color * diff;
+    float diff = max(dot(normalize(Normal), worldLightDir), 0.0);
+	vec3 ambient = 0.2 * color;
+	vec3 shadedColor = ambient + color * diff;
 
     FragColor = vec4(shadedColor, 1.0);
 }

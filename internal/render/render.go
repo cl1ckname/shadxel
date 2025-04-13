@@ -35,6 +35,9 @@ func NewRenderer() (*Renderer, error) {
 }
 
 func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
+	gl.Viewport(0, 0, 1600, 1200) // or update this dynamically on resize
+	gl.ClearColor(0.9, 0.9, 0.9, 1.0)
+	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(r.shader.ID)
 
 	// Set view and projection once per frame
@@ -48,6 +51,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 	center := float32(grid.Size) / 2
 	bounds := float32(grid.Size) * scale
 	model := mgl32.Scale3D(bounds/2, bounds/2, bounds/2) // scale from unit cube to voxel bounds
+	lightDir := view.Inv().Mul4x1(mgl32.Vec4{0.1, -0.1, 0.7, 0}.Normalize()).Vec3()
 
 	r.wirecube.Draw(r.shader, mgl32.Vec3{1, 1, 1}, model) // white cube
 
@@ -74,7 +78,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 					mgl32.Scale3D(scale, scale, scale),
 				)
 
-				r.mesh.DrawAt(r.shader, color, model)
+				r.mesh.DrawAt(r.shader, color, lightDir, model)
 			}
 		}
 	}
