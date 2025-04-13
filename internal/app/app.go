@@ -2,6 +2,7 @@ package app
 
 import (
 	"runtime"
+	"shadxel/internal/camera"
 	"shadxel/internal/luaengine"
 	"shadxel/internal/render"
 	"time"
@@ -11,18 +12,12 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var view = mgl32.LookAtV(
-	mgl32.Vec3{-1, 2, -3}, // camera position
-	mgl32.Vec3{0, 0, 0},   // look at center
-	mgl32.Vec3{0, 1, 0},   // up
-)
-
 var projection = mgl32.Perspective(mgl32.DegToRad(45.0), 1, 0.1, 100.0)
 
 type App struct {
 	window    *sdl.Window
 	renderer  *render.Renderer
-	rotation  float32
+	camera    *camera.OrbitCamera
 	mouseHeld bool
 	lastX     int32
 	engine    *luaengine.LuaEngine
@@ -71,6 +66,7 @@ func NewApp() (*App, error) {
 		window:   window,
 		renderer: renderer,
 		engine:   lua,
+		camera:   camera.NewOrbitCamera(),
 	}, nil
 }
 
@@ -95,9 +91,9 @@ func (a *App) Run() {
 				}
 			case *sdl.MouseMotionEvent:
 				if a.mouseHeld {
-					dx := e.X - a.lastX
-					a.rotation += float32(dx) * 0.01
-					a.lastX = e.X
+					dx := e.XRel
+					dy := e.YRel
+					a.camera.Rotate(float32(dx), float32(dy))
 				}
 			}
 		}
@@ -109,6 +105,7 @@ func (a *App) Run() {
 			grid := a.engine.GenerateGrid(50, frame)
 
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			view := a.camera.ViewMatrix()
 			a.renderer.Draw(grid, view, projection)
 			a.window.GLSwap()
 			frame++
