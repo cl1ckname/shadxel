@@ -1,6 +1,4 @@
 function voxel(x, y, z, t)
-	x = x + math.floor(math.sin(t) * 3)
-	y = y + math.floor(math.cos(t) * 3)
 	local function isInMenger(x, y, z)
 		while x > 0 or y > 0 or z > 0 do
 			if x % 3 == 1 and y % 3 == 1 or

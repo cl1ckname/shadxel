@@ -3,6 +3,7 @@ package app
 import (
 	"runtime"
 	"shadxel/internal/camera"
+	"shadxel/internal/config"
 	"shadxel/internal/luaengine"
 	"shadxel/internal/render"
 	"time"
@@ -28,7 +29,7 @@ func init() {
 	runtime.LockOSThread()
 }
 
-func NewApp() (*App, error) {
+func NewApp(c config.Config) (*App, error) {
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func NewApp() (*App, error) {
 	}
 	gl.Enable(gl.DEPTH_TEST)
 
-	lua, err := luaengine.NewLuaEngine("script.lua")
+	lua, err := luaengine.NewLuaEngine(c.Script)
 	if err != nil {
 		return nil, err
 	}
