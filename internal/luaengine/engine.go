@@ -20,33 +20,42 @@ func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
 	return &LuaEngine{L: L}, nil
 }
 
-func (le *LuaEngine) GenerateGrid(width, height, t int) voxel.Grid {
-	grid := make(voxel.Grid, height)
-	for y := 0; y < height; y++ {
-		grid[y] = make([]voxel.Color, width)
-		for x := 0; x < width; x++ {
-			r, g, b := le.callVoxelFunc(x, y, t)
-			grid[y][x] = voxel.Color{
-				R: uint8(r),
-				G: uint8(g),
-				B: uint8(b),
+func (le *LuaEngine) GenerateGrid(size, t int) voxel.VoxelGrid {
+	grid := make(voxel.Grid, size)
+	for y := 0; y < size; y++ {
+		grid[y] = make([][]voxel.Color, size)
+		for x := 0; x < size; x++ {
+			grid[y][x] = make([]voxel.Color, size)
+			for z := 0; z < size; z++ {
+				r, g, b := le.callVoxelFunc(x, y, z, t, size)
+				grid[y][x][z] = voxel.Color{
+					R: uint8(r),
+					G: uint8(g),
+					B: uint8(b),
+				}
 			}
 		}
 	}
-	return grid
+	return voxel.VoxelGrid{
+		Data: grid,
+		Size: size,
+	}
 }
 
-func (le *LuaEngine) callVoxelFunc(x, y, t int) (int, int, int) {
+func (le *LuaEngine) callVoxelFunc(x, y, z, t, size int) (int, int, int) {
 	fn := le.L.GetGlobal("voxel")
 	if fn.Type() != lua.LTFunction {
 		return 255, 0, 255 // fallback: magenta if no voxel() found
 	}
 
+	luaX := lua.LNumber(x - size/2)
+	luaY := lua.LNumber(y - size/2)
+	luaZ := lua.LNumber(z - size/2)
 	if err := le.L.CallByParam(lua.P{
 		Fn:      fn,
 		NRet:    3,
 		Protect: true,
-	}, lua.LNumber(x), lua.LNumber(y), lua.LNumber(t)); err != nil {
+	}, luaX, luaY, luaZ, lua.LNumber(t)); err != nil {
 		fmt.Fprintln(os.Stderr, "Lua error:", err)
 		return 255, 0, 0
 	}

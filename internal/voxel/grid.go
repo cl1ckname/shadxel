@@ -1,23 +1,27 @@
 package voxel
 
-type Grid = [][]Color
+type Grid = [][][]Color
 
 type Color struct {
 	R, G, B byte
 }
 
-func GenerateGrid(width, height int) [][]Color {
-	grid := make([][]Color, height)
-	for y := 0; y < height; y++ {
-		row := make([]Color, width)
-		for x := 0; x < width; x++ {
-			row[x] = Color{
-				R: 255 - byte(x*5),
-				G: byte(y * 5),
-				B: byte(100),
-			}
+type VoxelGrid struct {
+	Data [][][]Color
+	Size int
+}
+
+func NewVoxelGrid(size int) *VoxelGrid {
+	data := make([][][]Color, size)
+	for z := range data {
+		data[z] = make([][]Color, size)
+		for y := range data[z] {
+			data[z][y] = make([]Color, size)
 		}
-		grid[y] = row
 	}
-	return grid
+	return &VoxelGrid{Data: data, Size: size}
+}
+
+func (vg *VoxelGrid) At(x, y, z int) Color {
+	return vg.Data[z][y][x]
 }

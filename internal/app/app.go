@@ -7,8 +7,17 @@ import (
 	"time"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
 )
+
+var view = mgl32.LookAtV(
+	mgl32.Vec3{3, 3, 3}, // camera position
+	mgl32.Vec3{0, 0, 0}, // look at center
+	mgl32.Vec3{0, 1, 0}, // up
+)
+
+var projection = mgl32.Perspective(mgl32.DegToRad(45.0), 1, 0.1, 100.0)
 
 type App struct {
 	window    *sdl.Window
@@ -46,6 +55,7 @@ func NewApp() (*App, error) {
 	if err := gl.Init(); err != nil {
 		return nil, err
 	}
+	gl.Enable(gl.DEPTH_TEST)
 
 	lua, err := luaengine.NewLuaEngine("script.lua")
 	if err != nil {
@@ -68,8 +78,11 @@ func (a *App) Run() {
 	defer sdl.Quit()
 	defer a.window.Destroy()
 
-	start := time.Now()
+	ticker := time.NewTicker(time.Second / 2) // Redraw once per second
+	defer ticker.Stop()
 	running := true
+	var frame int
+
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
@@ -88,12 +101,20 @@ func (a *App) Run() {
 				}
 			}
 		}
+		select {
+		case <-ticker.C:
+			gl.Viewport(0, 0, 1600, 1200) // or update this dynamically on resize
+			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			grid := a.engine.GenerateGrid(50, frame)
 
-		elapsed := int(time.Since(start).Seconds())
-		grid := a.engine.GenerateGrid(50, 50, elapsed)
-		a.renderer.DrawGrid(grid, a.rotation)
-
-		a.window.GLSwap()
-		time.Sleep(16 * time.Millisecond) // ~60 FPS
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+			a.renderer.Draw(grid, view, projection)
+			a.window.GLSwap()
+			frame++
+		default:
+			// Avoid maxing CPU
+			sdl.Delay(1)
+		}
 	}
 }
