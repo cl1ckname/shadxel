@@ -12,9 +12,9 @@ import (
 )
 
 var view = mgl32.LookAtV(
-	mgl32.Vec3{3, 3, 3}, // camera position
-	mgl32.Vec3{0, 0, 0}, // look at center
-	mgl32.Vec3{0, 1, 0}, // up
+	mgl32.Vec3{-1, 2, -3}, // camera position
+	mgl32.Vec3{0, 0, 0},   // look at center
+	mgl32.Vec3{0, 1, 0},   // up
 )
 
 var projection = mgl32.Perspective(mgl32.DegToRad(45.0), 1, 0.1, 100.0)
@@ -104,7 +104,7 @@ func (a *App) Run() {
 		select {
 		case <-ticker.C:
 			gl.Viewport(0, 0, 1600, 1200) // or update this dynamically on resize
-			gl.ClearColor(0.1, 0.1, 0.1, 1.0)
+			gl.ClearColor(0.9, 0.9, 0.9, 1.0)
 			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 			grid := a.engine.GenerateGrid(50, frame)
 

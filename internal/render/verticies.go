@@ -46,3 +46,23 @@ func GenerateCubeVertices(size float32) []float32 {
 
 	return vertices
 }
+
+var wireCubeVertices = []float32{
+	// Bottom square
+	-1, -1, -1, 1, -1, -1,
+	1, -1, -1, 1, -1, 1,
+	1, -1, 1, -1, -1, 1,
+	-1, -1, 1, -1, -1, -1,
+
+	// Top square
+	-1, 1, -1, 1, 1, -1,
+	1, 1, -1, 1, 1, 1,
+	1, 1, 1, -1, 1, 1,
+	-1, 1, 1, -1, 1, -1,
+
+	// Vertical lines
+	-1, -1, -1, -1, 1, -1,
+	1, -1, -1, 1, 1, -1,
+	1, -1, 1, 1, 1, 1,
+	-1, -1, 1, -1, 1, 1,
+}

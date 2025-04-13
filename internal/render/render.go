@@ -9,9 +9,10 @@ import (
 )
 
 type Renderer struct {
-	shader ShaderProgram
-	mesh   *CubeMesh
-	scale  float32
+	shader   ShaderProgram
+	mesh     *CubeMesh
+	wirecube *WireCubeMesh
+	scale    float32
 }
 
 // Public constructor
@@ -20,10 +21,14 @@ func NewRenderer() (*Renderer, error) {
 	if err != nil {
 		return nil, err
 	}
+	cube := NewCubeMesh()
+
+	wirecube := NewWireCubeMesh()
 	r := &Renderer{
-		scale:  1. / 25, // adjust based on grid size
-		shader: *shader,
-		mesh:   NewCubeMesh(),
+		scale:    1. / 25, // adjust based on grid size
+		shader:   *shader,
+		mesh:     cube,
+		wirecube: wirecube,
 	}
 
 	return r, nil
@@ -41,6 +46,10 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 
 	scale := r.scale
 	center := float32(grid.Size) / 2
+	bounds := float32(grid.Size) * scale
+	model := mgl32.Scale3D(bounds/2, bounds/2, bounds/2) // scale from unit cube to voxel bounds
+
+	r.wirecube.Draw(r.shader, mgl32.Vec3{1, 1, 1}, model) // white cube
 
 	for z := range grid.Data {
 		for y := range grid.Data[z] {

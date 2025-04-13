@@ -1,25 +1,26 @@
 function voxel(x, y, z, t)
-    local function isInMenger(x, y, z)
-        while x > 0 or y > 0 or z > 0 do
-            if x % 3 == 1 and y % 3 == 1 or
-               x % 3 == 1 and z % 3 == 1 or
-               y % 3 == 1 and z % 3 == 1 then
-                return false
-            end
-            x = math.floor(x / 3)
-            y = math.floor(y / 3)
-            z = math.floor(z / 3)
-        end
-        return true
-    end
+	local size = 25
+	x = x - size
+	y = y - size
+	z = z - size
+	local min = -size
+	local max = size
 
-    if isInMenger(x, y, z) then
-        local r = 80 + x * 3
-        local g = 80 + y * 3
-        local b = 80 + z * 3
-        return r % 255, g % 255, b % 255
-    end
+	-- Check if we're on the surface of the cube
+	local on_x_edge = (x == min or x == max)
+	local on_y_edge = (y == min or y == max)
+	local on_z_edge = (z == min or z == max)
 
-    return 0, 0, 0
+	-- Count how many coordinates are on the border
+	local edge_count = 0
+	if on_x_edge then edge_count = edge_count + 1 end
+	if on_y_edge then edge_count = edge_count + 1 end
+	if on_z_edge then edge_count = edge_count + 1 end
+
+	-- A voxel is part of an edge if exactly 2 coordinates are at border
+	if edge_count == 2 then
+		return 200, 255, 255 -- bright cyan for edges
+	end
+
+	return 0, 0, 0
 end
-
