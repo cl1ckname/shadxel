@@ -66,3 +66,9 @@ var wireCubeVertices = []float32{
 	1, -1, 1, 1, 1, 1,
 	-1, -1, 1, -1, 1, 1,
 }
+
+var axisVertices = []float32{
+	0, 0, 0, 1, 0, 0, // X axis
+	0, 0, 0, 0, 1, 0, // Y axis
+	0, 0, 0, 0, 0, 1, // Z axis
+}

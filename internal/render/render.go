@@ -1,6 +1,8 @@
 package render
 
 import (
+	"shadxel/internal/render/mesh"
+	"shadxel/internal/render/shader"
 	"shadxel/internal/voxel"
 
 	"github.com/go-gl/mathgl/mgl32"
@@ -9,26 +11,30 @@ import (
 )
 
 type Renderer struct {
-	shader   ShaderProgram
-	mesh     *CubeMesh
-	wirecube *WireCubeMesh
+	shader   shader.Program
+	cube     *mesh.CubeMesh
+	wirecube *mesh.WireCubeMesh
+	axis     *mesh.AxisMesh
 	scale    float32
 }
 
+var vertices = GenerateCubeVertices(1.0)
+
 // Public constructor
 func NewRenderer() (*Renderer, error) {
-	shader, err := NewShaderProgram()
+	shader, err := shader.NewShaderProgram()
 	if err != nil {
 		return nil, err
 	}
-	cube := NewCubeMesh()
-
-	wirecube := NewWireCubeMesh()
+	cube := mesh.NewCubeMesh(vertices)
+	wirecube := mesh.NewWireCubeMesh(wireCubeVertices)
+	axis := mesh.NewAxisMesh(axisVertices)
 	r := &Renderer{
 		scale:    1. / 25, // adjust based on grid size
 		shader:   *shader,
-		mesh:     cube,
+		cube:     cube,
 		wirecube: wirecube,
+		axis:     axis,
 	}
 
 	return r, nil
@@ -54,6 +60,15 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 	lightDir := mgl32.Vec3{0.1, -0.1, 0.7}.Normalize()
 
 	r.wirecube.Draw(r.shader, mgl32.Vec3{1, 1, 1}, model) // white cube
+	arrowLen := bounds * 1.2
+	cornerOffset := mgl32.Vec3{
+		-bounds / 2, // shift from center to corner
+		-bounds / 2,
+		-bounds / 2,
+	}
+	cornerModel := mgl32.Translate3D(cornerOffset.X(), cornerOffset.Y(), cornerOffset.Z()).
+		Mul4(mgl32.Scale3D(arrowLen, arrowLen, arrowLen))
+	r.axis.Draw(r.shader, cornerModel)
 
 	for z := range grid.Data {
 		for y := range grid.Data[z] {
@@ -78,7 +93,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 					mgl32.Scale3D(scale, scale, scale),
 				)
 
-				r.mesh.DrawAt(r.shader, color, lightDir, model)
+				r.cube.DrawAt(r.shader, color, lightDir, model)
 			}
 		}
 	}

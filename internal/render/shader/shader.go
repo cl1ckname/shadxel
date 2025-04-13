@@ -1,4 +1,4 @@
-package render
+package shader
 
 import (
 	"fmt"
@@ -6,16 +6,16 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
-type ShaderProgram struct {
+type Program struct {
 	ID uint32
 }
 
-func NewShaderProgram() (*ShaderProgram, error) {
+func NewShaderProgram() (*Program, error) {
 	program, err := makeProgram(vertexShaderSource, fragmentShaderSource)
 	if err != nil {
 		return nil, err
 	}
-	return &ShaderProgram{ID: program}, nil
+	return &Program{ID: program}, nil
 }
 
 func makeProgram(vertexSrc, fragmentSrc string) (uint32, error) {

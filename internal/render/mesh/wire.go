@@ -1,6 +1,8 @@
-package render
+package mesh
 
 import (
+	"shadxel/internal/render/shader"
+
 	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -9,14 +11,14 @@ type WireCubeMesh struct {
 	vao uint32
 }
 
-func NewWireCubeMesh() *WireCubeMesh {
+func NewWireCubeMesh(vert []float32) *WireCubeMesh {
 	var vao, vbo uint32
 	gl.GenVertexArrays(1, &vao)
 	gl.GenBuffers(1, &vbo)
 
 	gl.BindVertexArray(vao)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(wireCubeVertices)*4, gl.Ptr(wireCubeVertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(vert)*4, gl.Ptr(vert), gl.STATIC_DRAW)
 
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 3*4, gl.PtrOffset(0))
 	gl.EnableVertexAttribArray(0)
@@ -24,7 +26,7 @@ func NewWireCubeMesh() *WireCubeMesh {
 	return &WireCubeMesh{vao: vao}
 }
 
-func (c *WireCubeMesh) Draw(shader ShaderProgram, color mgl32.Vec3, model mgl32.Mat4) {
+func (c *WireCubeMesh) Draw(shader shader.Program, color mgl32.Vec3, model mgl32.Mat4) {
 	gl.UseProgram(shader.ID)
 
 	gl.BindVertexArray(c.vao)
