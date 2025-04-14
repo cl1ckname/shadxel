@@ -7,38 +7,52 @@ import (
 )
 
 type OrbitCamera struct {
-	Yaw, Pitch float32
-	Distance   float32
+	Distance    float32
+	Orientation mgl32.Quat
+	Target      mgl32.Vec3
 }
 
 func NewOrbitCamera() *OrbitCamera {
+	initialYaw := mgl32.QuatRotate(mgl32.DegToRad(-45), mgl32.Vec3{0, 1, 0})
+	initialPitch := mgl32.QuatRotate(mgl32.DegToRad(30), mgl32.Vec3{1, 0, 0})
 	return &OrbitCamera{
-		Yaw:      -math.Pi / 4,
-		Pitch:    math.Pi / 6,
-		Distance: 6.0,
+		Orientation: initialYaw.Mul(initialPitch),
+		Distance:    6.0,
+		Target:      mgl32.Vec3{0, 0, 0},
 	}
 }
 
 func (c *OrbitCamera) ViewMatrix() mgl32.Mat4 {
-	x := c.Distance * float32(math.Cos(float64(c.Pitch))*math.Cos(float64(c.Yaw)))
-	y := c.Distance * float32(math.Sin(float64(c.Pitch)))
-	z := c.Distance * float32(math.Cos(float64(c.Pitch))*math.Sin(float64(c.Yaw)))
+	// Default forward direction (looking down -Z)
+	forward := c.Orientation.Rotate(mgl32.Vec3{0, 0, -1})
+	up := c.Orientation.Rotate(mgl32.Vec3{0, 1, 0})
+	eye := c.Target.Sub(forward.Mul(c.Distance))
 
-	eye := mgl32.Vec3{x, y, z}
-	center := mgl32.Vec3{0, 0, 0}
-	up := mgl32.Vec3{0, 1, 0}
-	return mgl32.LookAtV(eye, center, up)
+	return mgl32.LookAtV(eye, c.Target, up)
 }
 
 func (c *OrbitCamera) Rotate(dx, dy float32) {
-	c.Yaw += dx * 0.005
-	c.Pitch += dy * 0.005
+	// Sensitivity
+	const sensitivity = 0.005
 
-	maxPitch := float32(math.Pi/2 - 0.1)
-	if c.Pitch > maxPitch {
-		c.Pitch = maxPitch
+	// Convert mouse movement into angles
+	yaw := dx * sensitivity
+	pitch := dy * sensitivity
+
+	// Build rotation quaternions
+	yawRot := mgl32.QuatRotate(yaw, mgl32.Vec3{0, -1, 0})     // Y-axis world up
+	pitchRot := mgl32.QuatRotate(pitch, mgl32.Vec3{-1, 0, 0}) // X-axis local
+
+	// Apply rotation
+	c.Orientation = yawRot.Mul(c.Orientation)   // yaw rotates globally
+	c.Orientation = c.Orientation.Mul(pitchRot) // pitch rotates locally
+}
+
+const twoPi = float32(2 * math.Pi)
+
+func wrapAngle(angle float32) float32 {
+	if angle > twoPi || angle < -twoPi {
+		angle = float32(math.Mod(float64(angle), float64(twoPi)))
 	}
-	if c.Pitch < -maxPitch {
-		c.Pitch = -maxPitch
-	}
+	return angle
 }
