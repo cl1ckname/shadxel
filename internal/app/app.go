@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"runtime"
 	"shadxel/internal/camera"
 	"shadxel/internal/config"
@@ -9,11 +10,14 @@ import (
 	"time"
 
 	"github.com/go-gl/gl/v3.3-core/gl"
-	"github.com/go-gl/mathgl/mgl32"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var projection = mgl32.Perspective(mgl32.DegToRad(45.0), 1, 0.1, 100.0)
+const (
+	WindowWidth = 1600.
+	WindowHeigh = 1200.
+	Aspect      = WindowWidth / WindowHeigh
+)
 
 type App struct {
 	window    *sdl.Window
@@ -38,7 +42,7 @@ func NewApp(c config.Config) (*App, error) {
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
-	window, err := sdl.CreateWindow("Voxel Viewer", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, 1600, 1200, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+	window, err := sdl.CreateWindow("Shadxel", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, WindowWidth, WindowHeigh, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +62,7 @@ func NewApp(c config.Config) (*App, error) {
 		return nil, err
 	}
 
-	renderer, err := render.NewRenderer()
+	renderer, err := render.NewRenderer(Aspect)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +79,7 @@ func (a *App) Run() {
 	defer sdl.Quit()
 	defer a.window.Destroy()
 
-	ticker := time.NewTicker(time.Second / 2) // Redraw once per second
+	ticker := time.NewTicker(time.Second / 2)
 	defer ticker.Stop()
 	running := true
 	var frame int
@@ -90,6 +94,24 @@ func (a *App) Run() {
 				if e.Button == sdl.BUTTON_LEFT {
 					a.mouseHeld = e.State == sdl.PRESSED
 					a.lastX = e.X
+				}
+			case *sdl.KeyboardEvent:
+				if e.Type == sdl.KEYDOWN && e.Keysym.Sym == sdl.K_r {
+					err := a.engine.Load()
+					if err != nil {
+						log.Println("Failed to reload script:", err)
+					} else {
+						log.Println("Script reloaded!")
+					}
+				}
+			case *sdl.WindowEvent:
+				if e.Event == sdl.WINDOWEVENT_RESIZED {
+					width := e.Data1
+					height := e.Data2
+					a.renderer.Resize(width, height)
+					log.Printf("Window resized: %dx%d\n", width, height)
+
+					// Optionally update your projection matrix here if it depends on aspect ratio
 				}
 			case *sdl.MouseMotionEvent:
 				if a.mouseHeld {
@@ -108,7 +130,7 @@ func (a *App) Run() {
 			sdl.Delay(1)
 		}
 		view := a.camera.ViewMatrix()
-		a.renderer.Draw(grid, view, projection)
+		a.renderer.Draw(grid, view)
 		a.window.GLSwap()
 	}
 }

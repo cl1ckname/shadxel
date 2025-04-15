@@ -9,7 +9,8 @@ import (
 )
 
 type LuaEngine struct {
-	L *lua.LState
+	L      *lua.LState
+	script string
 }
 
 func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
@@ -17,7 +18,22 @@ func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
 	if err := L.DoFile(scriptPath); err != nil {
 		return nil, fmt.Errorf("failed to load lua script: %w", err)
 	}
-	return &LuaEngine{L: L}, nil
+	engine := LuaEngine{
+		script: scriptPath,
+	}
+	if err := engine.Load(); err != nil {
+		return nil, err
+	}
+	return &engine, nil
+}
+
+func (le *LuaEngine) Load() error {
+	L := lua.NewState()
+	if err := L.DoFile(le.script); err != nil {
+		return fmt.Errorf("failed to load lua script: %w", err)
+	}
+	le.L = L
+	return nil
 }
 
 func (le *LuaEngine) GenerateGrid(size, t int) voxel.VoxelGrid {

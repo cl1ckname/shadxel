@@ -11,17 +11,18 @@ import (
 )
 
 type Renderer struct {
-	shader   shader.Program
-	cube     *mesh.CubeMesh
-	wirecube *mesh.WireCubeMesh
-	axis     *mesh.AxisMesh
-	scale    float32
+	shader     shader.Program
+	cube       *mesh.CubeMesh
+	wirecube   *mesh.WireCubeMesh
+	axis       *mesh.AxisMesh
+	projection mgl32.Mat4
+	scale      float32
 }
 
 var vertices = GenerateCubeVertices(1.0)
 
 // Public constructor
-func NewRenderer() (*Renderer, error) {
+func NewRenderer(aspect float32) (*Renderer, error) {
 	shader, err := shader.NewShaderProgram()
 	if err != nil {
 		return nil, err
@@ -29,19 +30,27 @@ func NewRenderer() (*Renderer, error) {
 	cube := mesh.NewCubeMesh(vertices)
 	wirecube := mesh.NewWireCubeMesh(wireCubeVertices)
 	axis := mesh.NewAxisMesh(axisVertices)
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), aspect, 0.1, 100.0)
 	r := &Renderer{
-		scale:    1. / 25, // adjust based on grid size
-		shader:   *shader,
-		cube:     cube,
-		wirecube: wirecube,
-		axis:     axis,
+		scale:      1. / 25, // adjust based on grid size
+		shader:     *shader,
+		cube:       cube,
+		wirecube:   wirecube,
+		projection: projection,
+		axis:       axis,
 	}
 
 	return r, nil
 }
 
-func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
-	gl.Viewport(0, 0, 1600, 1200) // or update this dynamically on resize
+func (r *Renderer) Resize(w, h int32) {
+	gl.Viewport(0, 0, w, h)
+	aspect := float32(w) / float32(h)
+	projection := mgl32.Perspective(mgl32.DegToRad(45.0), aspect, 0.1, 100.0)
+	r.projection = projection
+}
+
+func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 	gl.ClearColor(0.9, 0.9, 0.9, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(r.shader.ID)
@@ -51,7 +60,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view, projection mgl32.Mat4) {
 	gl.UniformMatrix4fv(viewLoc, 1, false, &view[0])
 
 	projLoc := gl.GetUniformLocation(r.shader.ID, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projLoc, 1, false, &projection[0])
+	gl.UniformMatrix4fv(projLoc, 1, false, &r.projection[0])
 
 	scale := r.scale
 	center := float32(grid.Size) / 2
