@@ -23,6 +23,11 @@ var vertices = GenerateCubeVertices(1.0)
 
 // Public constructor
 func NewRenderer(aspect float32) (*Renderer, error) {
+	if err := gl.Init(); err != nil {
+		return nil, err
+	}
+	gl.Enable(gl.DEPTH_TEST)
+
 	shader, err := shader.NewShaderProgram()
 	if err != nil {
 		return nil, err

@@ -9,7 +9,6 @@ import (
 	"shadxel/internal/render"
 	"time"
 
-	"github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -51,11 +50,6 @@ func NewApp(c config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if err := gl.Init(); err != nil {
-		return nil, err
-	}
-	gl.Enable(gl.DEPTH_TEST)
 
 	lua, err := luaengine.NewLuaEngine(c.Script)
 	if err != nil {
@@ -104,14 +98,19 @@ func (a *App) Run() {
 						log.Println("Script reloaded!")
 					}
 				}
+				if e.Type == sdl.KEYDOWN && e.Keysym.Sym == sdl.K_F11 {
+					flags := a.window.GetFlags()
+					if flags&sdl.WINDOW_FULLSCREEN_DESKTOP != 0 {
+						a.window.SetFullscreen(0)
+					} else {
+						a.window.SetFullscreen(sdl.WINDOW_FULLSCREEN_DESKTOP)
+					}
+				}
 			case *sdl.WindowEvent:
 				if e.Event == sdl.WINDOWEVENT_RESIZED {
 					width := e.Data1
 					height := e.Data2
 					a.renderer.Resize(width, height)
-					log.Printf("Window resized: %dx%d\n", width, height)
-
-					// Optionally update your projection matrix here if it depends on aspect ratio
 				}
 			case *sdl.MouseMotionEvent:
 				if a.mouseHeld {
