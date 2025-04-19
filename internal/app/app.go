@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"shadxel/internal/camera"
 	"shadxel/internal/config"
+	"shadxel/internal/gridgen"
 	"shadxel/internal/luaengine"
 	"shadxel/internal/render"
 	"time"
@@ -16,6 +17,8 @@ const (
 	WindowWidth = 1600.
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
+	Size        = 150.
+	Period      = time.Second
 )
 
 type App struct {
@@ -24,7 +27,7 @@ type App struct {
 	camera    *camera.OrbitCamera
 	mouseHeld bool
 	lastX     int32
-	engine    *luaengine.LuaEngine
+	engine    *gridgen.Gridgen
 }
 
 // Call this first — SDL requires main thread
@@ -55,8 +58,9 @@ func NewApp(c config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	gg := gridgen.New(lua, Size, Period)
 
-	renderer, err := render.NewRenderer(Aspect)
+	renderer, err := render.NewRenderer(2./Size, Aspect)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +68,7 @@ func NewApp(c config.Config) (*App, error) {
 	return &App{
 		window:   window,
 		renderer: renderer,
-		engine:   lua,
+		engine:   gg,
 		camera:   camera.NewOrbitCamera(),
 	}, nil
 }
@@ -73,12 +77,9 @@ func (a *App) Run() {
 	defer sdl.Quit()
 	defer a.window.Destroy()
 
-	ticker := time.NewTicker(time.Second / 2)
-	defer ticker.Stop()
 	running := true
-	var frame int
 
-	grid := a.engine.GenerateGrid(50, frame)
+	a.engine.Start()
 	for running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			switch e := event.(type) {
@@ -120,13 +121,10 @@ func (a *App) Run() {
 				}
 			}
 		}
-		select {
-		case <-ticker.C:
-			grid = a.engine.GenerateGrid(50, frame)
-			frame++
-		default:
-			// Avoid maxing CPU
-			sdl.Delay(1)
+		grid, err := a.engine.Get()
+		if err != nil {
+			log.Println("error", err)
+			return
 		}
 		view := a.camera.ViewMatrix()
 		a.renderer.Draw(grid, view)

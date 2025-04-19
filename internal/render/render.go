@@ -17,12 +17,13 @@ type Renderer struct {
 	axis       *mesh.AxisMesh
 	projection mgl32.Mat4
 	scale      float32
+	size       float32
 }
 
 var vertices = GenerateCubeVertices(1.0)
 
 // Public constructor
-func NewRenderer(aspect float32) (*Renderer, error) {
+func NewRenderer(scale float32, aspect float32) (*Renderer, error) {
 	if err := gl.Init(); err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func NewRenderer(aspect float32) (*Renderer, error) {
 	axis := mesh.NewAxisMesh(axisVertices)
 	projection := mgl32.Perspective(mgl32.DegToRad(45.0), aspect, 0.1, 100.0)
 	r := &Renderer{
-		scale:      1. / 25, // adjust based on grid size
+		scale:      scale, // adjust based on grid size
 		shader:     *shader,
 		cube:       cube,
 		wirecube:   wirecube,
@@ -88,7 +89,7 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 		for y := range grid.Data[z] {
 			for x := range grid.Data[z][y] {
 				c := grid.At(x, y, z)
-				if c.R == 0 && c.G == 0 && c.B == 0 {
+				if !c.V {
 					continue
 				}
 

@@ -1,4 +1,4 @@
-function voxel(x, y, t)
+function Draw(x, y, t)
 	-- Background
 	local r, g, b = 150, 200, 255
 
