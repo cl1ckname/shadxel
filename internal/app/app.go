@@ -18,7 +18,7 @@ const (
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
 	Size        = 150.
-	Period      = time.Second
+	Period      = time.Second / 2
 )
 
 type App struct {
