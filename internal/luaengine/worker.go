@@ -65,38 +65,37 @@ func (w *Worker) GenerateRegion(x0, y0, z0, x1, y1, z1, t int) (voxel.Grid, erro
 		return nil, fmt.Errorf("expected table from DrawRegion")
 	}
 
-	sizeX := x1 - x0 + 1
-	sizeY := y1 - y0 + 1
-	sizeZ := z1 - z0 + 1
-
-	grid := make(voxel.Grid, sizeY)
-	for yi := 1; yi <= sizeY; yi++ {
-		rowY := table.RawGetInt(yi)
-		rowYTable, ok := rowY.(*lua.LTable)
-		if !ok {
-			continue
+	sx := x1 - x0 + 1
+	sy := y1 - y0 + 1
+	sz := z1 - z0 + 1
+	grid := make(voxel.Grid, sy)
+	for y := 0; y < sy; y++ {
+		grid[y] = make([][]voxel.Voxel, sx)
+		for x := 0; x < sx; x++ {
+			grid[y][x] = make([]voxel.Voxel, sz)
 		}
-		grid[yi-1] = make([][]voxel.Voxel, sizeX)
-		for xi := 1; xi <= sizeX; xi++ {
-			rowX := rowYTable.RawGetInt(xi)
-			rowXTable, ok := rowX.(*lua.LTable)
-			if !ok {
-				continue
-			}
-			grid[yi-1][xi-1] = make([]voxel.Voxel, sizeZ)
-			for zi := 1; zi <= sizeZ; zi++ {
-				vobj := rowXTable.RawGetInt(zi)
-				vtable, ok := vobj.(*lua.LTable)
-				if !ok {
-					continue
-				}
-				grid[yi-1][xi-1][zi-1] = voxel.Voxel{
-					Color: voxel.Color{
-						R: uint8(lua.LVAsNumber(vtable.RawGetString("r"))),
-						G: uint8(lua.LVAsNumber(vtable.RawGetString("g"))),
-						B: uint8(lua.LVAsNumber(vtable.RawGetString("b"))),
-					},
-					V: lua.LVAsBool(vtable.RawGetString("visible")),
+	}
+	// voxelCount := xSize * ySize * zSize
+	// if table.Len() != voxelCount*4 {
+	// 	return nil, fmt.Errorf("expected %d items, got %d", voxelCount*4, table.Len())
+	// }
+
+	i := 1
+	for y := 0; y < sy; y++ {
+		for x := 0; x < sx; x++ {
+			for z := 0; z < sz; z++ {
+				r := uint8(lua.LVAsNumber(table.RawGetInt(i)))
+				i++
+				g := uint8(lua.LVAsNumber(table.RawGetInt(i)))
+				i++
+				b := uint8(lua.LVAsNumber(table.RawGetInt(i)))
+				i++
+				vis := lua.LVAsNumber(table.RawGetInt(i)) != 0
+				i++
+
+				grid[y][x][z] = voxel.Voxel{
+					Color: voxel.Color{R: r, G: g, B: b},
+					V:     vis,
 				}
 			}
 		}
@@ -113,15 +112,15 @@ var fallbackRegionWrap = `
 function DrawRegion(x0, y0, z0, x1, y1, z1, t)
 	local out = {}
 	for y = y0, y1 do
-		local rowY = {}
 		for x = x0, x1 do
-			local rowX = {}
 			for z = z0, z1 do
-				rowX[#rowX + 1] = Draw(x, y, z, t)
+				local v = Draw(x, y, z, t)
+				out[#out + 1] = v.r
+				out[#out + 1] = v.g
+				out[#out + 1] = v.b
+				out[#out + 1] = v.visible and 1 or 0
 			end
-			rowY[#rowY + 1] = rowX
 		end
-		out[#out + 1] = rowY
 	end
 	return out
 end
