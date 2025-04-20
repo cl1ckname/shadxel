@@ -89,14 +89,14 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 		for y := range grid.Data[z] {
 			for x := range grid.Data[z][y] {
 				c := grid.At(x, y, z)
-				if !c.V {
+				if !c.Visible() {
 					continue
 				}
 
 				color := mgl32.Vec3{
-					float32(c.R) / 255,
-					float32(c.G) / 255,
-					float32(c.B) / 255,
+					float32(c.R()) / 255,
+					float32(c.G()) / 255,
+					float32(c.B()) / 255,
 				}
 
 				pos := mgl32.Vec3{

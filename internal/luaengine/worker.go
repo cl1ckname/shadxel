@@ -84,19 +84,14 @@ func (w *Worker) GenerateRegion(x0, y0, z0, x1, y1, z1, t int) (voxel.Grid, erro
 	for y := 0; y < sy; y++ {
 		for x := 0; x < sx; x++ {
 			for z := 0; z < sz; z++ {
-				r := uint8(lua.LVAsNumber(table.RawGetInt(i)))
+				vox := uint32(lua.LVAsNumber(table.RawGetInt(i)))
 				i++
-				g := uint8(lua.LVAsNumber(table.RawGetInt(i)))
-				i++
-				b := uint8(lua.LVAsNumber(table.RawGetInt(i)))
-				i++
-				vis := lua.LVAsNumber(table.RawGetInt(i)) != 0
-				i++
+				r := byte(vox >> 24)
+				g := byte(vox >> 16)
+				b := byte(vox >> 8)
+				vis := vox&1 != 0
 
-				grid[y][x][z] = voxel.Voxel{
-					Color: voxel.Color{R: r, G: g, B: b},
-					V:     vis,
-				}
+				grid[y][x][z] = voxel.NewVoxel(r, g, b, vis)
 			}
 		}
 	}
@@ -115,10 +110,7 @@ function DrawRegion(x0, y0, z0, x1, y1, z1, t)
 		for x = x0, x1 do
 			for z = z0, z1 do
 				local v = Draw(x, y, z, t)
-				out[#out + 1] = v.r
-				out[#out + 1] = v.g
-				out[#out + 1] = v.b
-				out[#out + 1] = v.visible and 1 or 0
+				out[#out + 1] = v
 			end
 		end
 	end

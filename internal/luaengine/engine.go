@@ -18,7 +18,7 @@ func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
 	engine := LuaEngine{
 		script: scriptPath,
 	}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 1; i++ {
 		worker, err := NewWorker(scriptPath)
 		if err != nil {
 			return nil, err

@@ -2,15 +2,6 @@ package voxel
 
 type Grid = [][][]Voxel
 
-type Color struct {
-	R, G, B byte
-}
-
-type Voxel struct {
-	Color
-	V bool
-}
-
 type VoxelGrid struct {
 	Data Grid
 	Size int

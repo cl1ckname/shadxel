@@ -1,23 +1,20 @@
----@class Voxel
----@field r integer
----@field g integer
----@field b integer
----@field visible boolean
-
-
 function voxel(r, g, b, visible)
-	return { r = r, g = g, b = b, visible = visible }
+	local v = r * 0x1000000 + g * 0x10000 + b * 0x100
+	if visible then
+		v = v + 1
+	end
+	return v
 end
 
 ---@param r integer
 ---@param g integer
 ---@param b integer
----@return Voxel
+---@return integer
 function color(r, g, b)
 	return voxel(r, g, b, true)
 end
 
-null = { r = 0, g = 0, b = 0, visible = false }
+local null = voxel(0, 0, 0, false)
 
 return {
 	voxel = voxel,

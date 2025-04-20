@@ -52,7 +52,6 @@ func (g *Gridgen) genOrDelay(t *time.Ticker) {
 	select {
 	case <-t.C:
 		g.updateGrid()
-		log.Println("Update!", g.frame)
 	default:
 		time.Sleep(time.Millisecond)
 	}
@@ -61,6 +60,10 @@ func (g *Gridgen) genOrDelay(t *time.Ticker) {
 func (g *Gridgen) updateGrid() {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	start := time.Now()
+	defer func() {
+		log.Println("elapsed", time.Since(start).Milliseconds(), "ms")
+	}()
 
 	grid, err := g.engine.GenerateGridParallel(g.size, g.frame)
 	if err != nil {
