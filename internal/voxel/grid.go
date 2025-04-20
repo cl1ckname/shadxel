@@ -21,3 +21,16 @@ func NewVoxelGrid(size int) *VoxelGrid {
 func (vg *VoxelGrid) At(x, y, z int) Voxel {
 	return vg.Data[z][y][x]
 }
+
+func (vg *VoxelGrid) InBounds(x, y, z int) bool {
+	if x < 0 || x > vg.Size {
+		return false
+	}
+	if y < 0 || y > vg.Size {
+		return false
+	}
+	if z < 0 || z > vg.Size {
+		return false
+	}
+	return true
+}

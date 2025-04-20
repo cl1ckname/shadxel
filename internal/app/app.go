@@ -17,7 +17,7 @@ const (
 	WindowWidth = 1600.
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
-	Size        = 150.
+	Size        = 1.
 	Period      = time.Second / 2
 )
 
@@ -60,7 +60,7 @@ func NewApp(c config.Config) (*App, error) {
 	}
 	gg := gridgen.New(lua, Size, Period)
 
-	renderer, err := render.NewRenderer(2./Size, Aspect)
+	renderer, err := render.NewRenderer(2./Size/32, Aspect)
 	if err != nil {
 		return nil, err
 	}

@@ -28,7 +28,8 @@ func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
 	return &engine, nil
 }
 
-func (le *LuaEngine) GenerateGridParallel(size, t int) (voxel.VoxelGrid, error) {
+func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
+	size := s * 32
 	workerCount := len(le.workers)
 	regionSize := size / workerCount
 	half := size / 2

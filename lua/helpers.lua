@@ -16,8 +16,16 @@ end
 
 local null = voxel(0, 0, 0, false)
 
+function isin(x, a, b)
+	return a < x and x < b
+end
+
 return {
 	voxel = voxel,
 	color = color,
+	isin = isin,
 	null = null,
+
+	WHITE = color(255, 255, 255),
+	BLACK = color(0, 0, 0),
 }

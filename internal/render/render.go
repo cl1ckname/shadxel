@@ -99,17 +99,35 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 					float32(c.B()) / 255,
 				}
 
-				pos := mgl32.Vec3{
-					(float32(x) - center) * scale,
-					(float32(y) - center) * scale,
-					(float32(z) - center) * scale,
-				}
-				model := mgl32.Translate3D(pos.X(), pos.Y(), pos.Z()).Mul4(
-					mgl32.Scale3D(scale, scale, scale),
-				)
+				for _, dir := range dirs {
+					nx, ny, nz := x+dir.dx, y+dir.dy, z+dir.dz
+					if !grid.InBounds(nx, ny, nz) || grid.At(nx, ny, nz).Visible() {
+						continue
+					}
+					pos := mgl32.Vec3{
+						(float32(x) - center) * scale,
+						(float32(y) - center) * scale,
+						(float32(z) - center) * scale,
+					}
+					model := mgl32.Translate3D(pos.Y(), pos.Z(), pos.X()).Mul4(
+						mgl32.Scale3D(scale, scale, scale),
+					)
 
-				r.cube.DrawAt(r.shader, color, lightDir, model)
+					r.cube.DrawAt(r.shader, color, lightDir, model)
+				}
+
 			}
 		}
 	}
+}
+
+var dirs = []struct {
+	dx, dy, dz int
+}{
+	{1, 0, 0},
+	{0, 1, 0},
+	{0, 0, 1},
+	{-1, 0, 0},
+	{0, -1, 0},
+	{0, 0, -1},
 }

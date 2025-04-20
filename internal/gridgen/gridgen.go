@@ -83,9 +83,6 @@ func (g *Gridgen) Load() error {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	// if err := g.engine.Load(); err != nil {
-	// 	return err
-	// }
 	g.frame = 0
 	g.err = nil
 	return nil
