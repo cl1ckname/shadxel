@@ -4,22 +4,28 @@ import (
 	"shadxel/internal/voxel"
 )
 
+const chunkSize = 32
+
 type chunk struct {
 	x0, y0, z0 int
 	x1, y1, z1 int
 }
 
+type result struct {
+	x    int
+	z    int
+	grid voxel.Grid
+	err  error
+}
+
 type LuaEngine struct {
-	script  string
 	workers []*Worker
 }
 
-func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
-	engine := LuaEngine{
-		script: scriptPath,
-	}
-	for i := 0; i < 1; i++ {
-		worker, err := NewWorker(scriptPath)
+func NewLuaEngine(script string) (*LuaEngine, error) {
+	engine := LuaEngine{}
+	for i := 0; i < 4; i++ {
+		worker, err := NewWorker(script)
 		if err != nil {
 			return nil, err
 		}
@@ -30,51 +36,64 @@ func NewLuaEngine(scriptPath string) (*LuaEngine, error) {
 
 func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
 	size := s * 32
-	workerCount := len(le.workers)
-	regionSize := size / workerCount
 	half := size / 2
 
-	tasks := make([]chunk, 0, workerCount)
-	for i := 0; i < workerCount; i++ {
-		x0 := -half
-		y0 := -half + i*regionSize
-		z0 := -half
-		x1 := x0 + size - 1
-		y1 := y0 + regionSize - 1
-		z1 := z0 + size - 1
-		tasks = append(tasks, chunk{x0, y0, z0, x1, y1, z1})
+	for _, worker := range le.workers {
+		worker.tasks = make([]chunk, 0, 32)
 	}
 
-	type result struct {
-		index int
-		grid  voxel.Grid
-		err   error
+	var count int
+	for cz := -half; cz < half; cz += chunkSize {
+		for cx := -half; cx < half; cx += chunkSize {
+			worker := le.workers[count%len(le.workers)]
+			worker.AddTask(chunk{
+				x0: cx,
+				y0: -half,
+				z0: cz,
+				x1: cx + chunkSize - 1,
+				y1: half - 1,
+				z1: cz + chunkSize - 1,
+			})
+			count++
+		}
 	}
 
-	results := make(chan result, workerCount)
+	results := make(chan result, count)
 
-	for i, task := range tasks {
-		go func(i int, task chunk) {
-			worker := le.workers[i]
-
-			grid, err := worker.GenerateRegion(task.x0, task.y0, task.z0, task.x1, task.y1, task.z1, t)
-			results <- result{i, grid, err}
-		}(i, task)
+	for _, worker := range le.workers {
+		go func(worker *Worker) {
+			worker.ProcessTasks(results, t)
+		}(worker)
 	}
 
 	// Merge all results into a single voxel grid
-	finalGrid := make(voxel.Grid, size)
-	for i := 0; i < workerCount; i++ {
-		res := <-results
+	final := make(voxel.Grid, size)
+	for y := range final {
+		final[y] = make([][]voxel.Voxel, size)
+		for x := range final[y] {
+			final[y][x] = make([]voxel.Voxel, size)
+		}
+	}
+
+	for res := range results {
 		if res.err != nil {
 			return voxel.VoxelGrid{}, res.err
 		}
-		offset := res.index * regionSize
-		copy(finalGrid[offset:], res.grid)
+		for z := 0; z < chunkSize; z++ {
+			for x := 0; x < chunkSize; x++ {
+				for y := -half; y < half; y++ {
+					final[half+y][half+res.x+x][half+res.z+z] = res.grid[half+y][x][z]
+				}
+			}
+		}
+		count--
+		if count == 0 {
+			close(results)
+		}
 	}
 
 	return voxel.VoxelGrid{
-		Data: finalGrid,
+		Data: final,
 		Size: size,
 	}, nil
 }

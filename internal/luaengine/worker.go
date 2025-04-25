@@ -11,9 +11,10 @@ type Worker struct {
 	L      *lua.LState
 	script string
 	fn     lua.LValue
+	tasks  []chunk
 }
 
-func NewWorker(scriptPath string) (*Worker, error) {
+func NewWorker(script string) (*Worker, error) {
 	L := lua.NewState()
 
 	// Preload helpers
@@ -24,7 +25,11 @@ func NewWorker(scriptPath string) (*Worker, error) {
 		return 1
 	})
 
-	if err := L.DoFile(scriptPath); err != nil {
+	return NewWorkerFromState(L, script)
+}
+
+func NewWorkerFromState(L *lua.LState, script string) (*Worker, error) {
+	if err := L.DoString(script); err != nil {
 		return nil, fmt.Errorf("worker failed to load lua script: %w", err)
 	}
 
@@ -39,9 +44,28 @@ func NewWorker(scriptPath string) (*Worker, error) {
 
 	return &Worker{
 		L:      L,
-		script: scriptPath,
+		script: script,
 		fn:     fn,
+		tasks:  make([]chunk, 0, 32),
 	}, nil
+}
+
+func (w *Worker) AddTask(task chunk) {
+	w.tasks = append(w.tasks, task)
+}
+
+func (w *Worker) ProcessTasks(res chan<- result, t int) {
+	for _, task := range w.tasks {
+		grid, err := w.GenerateRegion(task.x0, task.y0, task.z0, task.x1, task.y1, task.z1, t)
+		r := result{
+			x:    task.x0,
+			z:    task.z0,
+			grid: grid,
+			err:  err,
+		}
+		res <- r
+	}
+	w.tasks = nil
 }
 
 func (w *Worker) GenerateRegion(x0, y0, z0, x1, y1, z1, t int) (voxel.Grid, error) {

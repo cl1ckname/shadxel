@@ -9,6 +9,8 @@ pkgs.mkShell {
     pkgs.SDL2_mixer
     pkgs.mesa # provides libGL.so and other OpenGL components
     pkgs.pkg-config
+    pkgs.pkgsCross.mingwW64.buildPackages.gcc
+    pkgs.gcc
   ];
 
   shellHook = ''

@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	"os"
 	"runtime"
 	"shadxel/internal/camera"
 	"shadxel/internal/config"
@@ -17,7 +18,7 @@ const (
 	WindowWidth = 1600.
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
-	Size        = 1.
+	Size        = 3.
 	Period      = time.Second / 2
 )
 
@@ -54,7 +55,11 @@ func NewApp(c config.Config) (*App, error) {
 		return nil, err
 	}
 
-	lua, err := luaengine.NewLuaEngine(c.Script)
+	content, err := os.ReadFile(c.Script)
+	if err != nil {
+		return nil, err
+	}
+	lua, err := luaengine.NewLuaEngine(string(content))
 	if err != nil {
 		return nil, err
 	}

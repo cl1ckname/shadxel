@@ -12,7 +12,6 @@ It allows you to generate animated, procedural voxel scenes using simple Lua scr
 - [Go](https://golang.org/dl/) 1.20+
 - [SDL2](https://www.libsdl.org/)
 - OpenGL 3.3 or later
-- Lua 5.1+
 
 > Note: macOS and Windows support are possible with tweaks and dependencies.
 
@@ -31,7 +30,7 @@ go build
 Run with a Lua script:
 
 ```bash
-./shadxel name
+./bin/shadxel lua/script.lua
 ```
 
 Or start without arguments to open a file picker:
@@ -44,36 +43,26 @@ Or start without arguments to open a file picker:
 
 ## 📜 Lua Scripting
 
-Each script should define a global `voxel(x, y, z, t)` function.  
-It gets voxel coordinates and time (in seconds), and returns RGB values.
+Each script should define a global `Draw(x, y, z, t)` function.  
+It gets voxel coordinates and time (in seconds), and returns RGB values encoded in i32.
 
-Return `(0, 0, 0)` for empty space.
+Return `0xrrggbb01` for visible voxel, where `rr`, `gg` and `bb` are the hex codes of color channel. To return empty voxel just return 0. There are some helper functions in `lua/helpers.lua` file, for e.g. `color(r, g, b)` that calculates voxel or `null` that actually just an empty voxel.
 
 ### Example: Glowing Sphere
 
 ```lua
-function voxel(x, y, z, t)
+h = require("h")
+
+function Draw(x, y, z, t)
     local d = x*x + y*y + z*z
     if d < 40 + math.sin(t * 2) * 10 then
-        return 255, 180, 100
+        return h.color(255, 255, 100)
     end
-    return 0, 0, 0
+    return h.null
 end
 ```
 
-Place your `.lua` files in any directory and open them via CLI or the file picker.
-
----
-
-## 🎮 Controls
-
-| Action            | Control     |
-|-------------------|-------------|
-| Rotate view       | Mouse drag  |
-| Zoom in/out       | Mouse wheel |
-| Reload script     | Press `R`   |
-| Open file dialog  | Press `O`   |
-| Quit              | Press `ESC` |
+Place your `.lua` files in `lua/` directory and open them via CLI.
 
 ---
 
@@ -83,9 +72,4 @@ Place your `.lua` files in any directory and open them via CLI or the file picke
 - [ ] Export to `.vox` or `.png`  
 - [ ] Camera keyframe animations  
 - [ ] Modular shader styles  
-- [ ] Audio-reactive voxel input  
 
----
-
-## 🧪 Made with 💖 in Go, OpenGL, and Lua
-```
