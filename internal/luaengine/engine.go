@@ -1,10 +1,11 @@
 package luaengine
 
 import (
+	"fmt"
 	"shadxel/internal/voxel"
 )
 
-const chunkSize = 32
+const chunkSize = 16
 
 type chunk struct {
 	x0, y0, z0 int
@@ -22,9 +23,12 @@ type LuaEngine struct {
 	workers []*Worker
 }
 
-func NewLuaEngine(script string) (*LuaEngine, error) {
+func NewLuaEngine(script string, workers int) (*LuaEngine, error) {
+	if workers == 0 {
+		return nil, fmt.Errorf("could not build engine with 0 workers")
+	}
 	engine := LuaEngine{}
-	for i := 0; i < 4; i++ {
+	for i := 0; i < workers; i++ {
 		worker, err := NewWorker(script)
 		if err != nil {
 			return nil, err
@@ -35,11 +39,11 @@ func NewLuaEngine(script string) (*LuaEngine, error) {
 }
 
 func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
-	size := s * 32
+	size := s * chunkSize
 	half := size / 2
 
 	for _, worker := range le.workers {
-		worker.tasks = make([]chunk, 0, 32)
+		worker.tasks = make([]chunk, 0, 16)
 	}
 
 	var count int
@@ -79,10 +83,10 @@ func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
 		if res.err != nil {
 			return voxel.VoxelGrid{}, res.err
 		}
-		for z := 0; z < chunkSize; z++ {
+		for y := 0; y < size; y++ {
 			for x := 0; x < chunkSize; x++ {
-				for y := -half; y < half; y++ {
-					final[half+y][half+res.x+x][half+res.z+z] = res.grid[half+y][x][z]
+				for z := 0; z < chunkSize; z++ {
+					final[y][half+res.x+x][half+res.z+z] = res.grid[y][x][z]
 				}
 			}
 		}

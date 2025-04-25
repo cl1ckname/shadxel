@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -15,10 +16,10 @@ import (
 )
 
 const (
+	Version     = "0.0.1"
 	WindowWidth = 1600.
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
-	Size        = 3.
 	Period      = time.Second / 2
 )
 
@@ -37,6 +38,11 @@ func init() {
 }
 
 func NewApp(c config.Config) (*App, error) {
+	fmt.Printf("Running Shadxel %s!\n", Version)
+	fmt.Printf("Size: %d (%d voxels on axis)\n", c.Size, c.Size*16)
+	fmt.Printf("Script: %s\n", c.Script)
+	fmt.Printf("Workers: %d\n", c.Workers)
+
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err
 	}
@@ -59,13 +65,13 @@ func NewApp(c config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	lua, err := luaengine.NewLuaEngine(string(content))
+	lua, err := luaengine.NewLuaEngine(string(content), c.Workers)
 	if err != nil {
 		return nil, err
 	}
-	gg := gridgen.New(lua, Size, Period)
+	gg := gridgen.New(lua, c.Size, Period)
 
-	renderer, err := render.NewRenderer(2./Size/32, Aspect)
+	renderer, err := render.NewRenderer(2./float32(c.Size)/16, Aspect)
 	if err != nil {
 		return nil, err
 	}

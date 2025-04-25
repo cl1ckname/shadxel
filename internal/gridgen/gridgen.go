@@ -1,7 +1,6 @@
 package gridgen
 
 import (
-	"log"
 	"shadxel/internal/luaengine"
 	"shadxel/internal/voxel"
 	"sync"
@@ -60,10 +59,6 @@ func (g *Gridgen) genOrDelay(t *time.Ticker) {
 func (g *Gridgen) updateGrid() {
 	g.mu.Lock()
 	defer g.mu.Unlock()
-	start := time.Now()
-	defer func() {
-		log.Println("elapsed", time.Since(start).Milliseconds(), "ms")
-	}()
 
 	grid, err := g.engine.GenerateGridParallel(g.size, g.frame)
 	if err != nil {

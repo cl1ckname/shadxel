@@ -101,7 +101,10 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 
 				for _, dir := range dirs {
 					nx, ny, nz := x+dir.dx, y+dir.dy, z+dir.dz
-					if !grid.InBounds(nx, ny, nz) || grid.At(nx, ny, nz).Visible() {
+					if !grid.InBounds(nx, ny, nz) {
+						continue
+					}
+					if !grid.At(nx, ny, nz).Visible() {
 						continue
 					}
 					pos := mgl32.Vec3{

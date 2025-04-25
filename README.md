@@ -35,6 +35,42 @@ Run with a Lua script:
 
 Or start without arguments to open a file picker:
 
+Sure! Here's a clean **README** section you can add under something like `## Command-Line Options` or `## Usage`.
+
+### 🧰 Command-Line Options
+
+This program accepts a few command-line arguments to control its behavior. Options should be passed **before** the Lua script name.
+
+### 📋 Available Flags
+
+| Flag         | Type   | Description                                               | Default           |
+|--------------|--------|-----------------------------------------------------------|-------------------|
+| `-size`      | int    | Number of chunks per axis (grid size = `size × 32`)       | `2`               |
+| `-cpu`       | int    | Number of Lua workers to run in parallel                  | Half of CPU cores |
+| *positional* | string | Path to a `.lua` script (omit extension or folder prefix) | `demo/demo.lua`   |
+
+> 📝 Positional script argument should **not** include `demo/` or `.lua`. Just provide the script name (e.g., `sphere` for `demo/sphere.lua`).
+
+---
+
+### 🧪 Examples
+
+```bash
+# Use default size and workers, run demo/sphere.lua
+./voxelapp sphere
+
+# Explicitly set grid size to 4x4x4 chunks and use 8 workers
+./voxelapp -size 4 -cpu 8 custom_script
+
+# Use default demo if no script is specified
+./voxelapp
+```
+
+---
+
+Let me know if you'd like a more advanced CLI parser later (like `cobra`) — for now this is clean, efficient, and good for simple scripting workflows.
+
+
 ```bash
 ./shadxel
 ```

@@ -23,13 +23,13 @@ func (vg *VoxelGrid) At(x, y, z int) Voxel {
 }
 
 func (vg *VoxelGrid) InBounds(x, y, z int) bool {
-	if x < 0 || x > vg.Size {
+	if x < 0 || x >= vg.Size {
 		return false
 	}
-	if y < 0 || y > vg.Size {
+	if y < 0 || y >= vg.Size {
 		return false
 	}
-	if z < 0 || z > vg.Size {
+	if z < 0 || z >= vg.Size {
 		return false
 	}
 	return true

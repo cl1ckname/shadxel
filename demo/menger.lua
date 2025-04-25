@@ -1,4 +1,9 @@
-function voxel(x, y, z, t)
+h = require("helpers")
+
+function Draw(x, y, z, t)
+	x = math.abs(x)
+	y = math.abs(y)
+	z = math.abs(z)
 	local function isInMenger(x, y, z)
 		while x > 0 or y > 0 or z > 0 do
 			if x % 3 == 1 and y % 3 == 1 or
@@ -17,8 +22,8 @@ function voxel(x, y, z, t)
 		local r = 80 + x * 3
 		local g = 80 + y * 3
 		local b = 80 + z * 3
-		return r % 255, g % 255, b % 255
+		return h.color(255 % 255, g % 255, b % 255)
 	end
 
-	return 0, 0, 0
+	return h.null
 end
