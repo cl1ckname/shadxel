@@ -10,6 +10,8 @@ import (
 	"github.com/go-gl/gl/v3.3-core/gl"
 )
 
+var lightDir = mgl32.Vec3{0.1, -0.1, 0.7}.Normalize()
+
 type Renderer struct {
 	shader     shader.Program
 	cube       *mesh.CubeMesh
@@ -72,7 +74,6 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 	center := float32(grid.Size) / 2
 	bounds := float32(grid.Size) * scale
 	model := mgl32.Scale3D(bounds/2, bounds/2, bounds/2) // scale from unit cube to voxel bounds
-	lightDir := mgl32.Vec3{0.1, -0.1, 0.7}.Normalize()
 
 	r.wirecube.Draw(r.shader, mgl32.Vec3{1, 1, 1}, model) // white cube
 	arrowLen := bounds * 1.2
@@ -98,39 +99,21 @@ func (r *Renderer) Draw(grid voxel.VoxelGrid, view mgl32.Mat4) {
 					float32(c.G()) / 255,
 					float32(c.B()) / 255,
 				}
-
-				for _, dir := range dirs {
-					nx, ny, nz := x+dir.dx, y+dir.dy, z+dir.dz
-					if !grid.InBounds(nx, ny, nz) {
-						continue
-					}
-					if !grid.At(nx, ny, nz).Visible() {
-						continue
-					}
-					pos := mgl32.Vec3{
-						(float32(x) - center) * scale,
-						(float32(y) - center) * scale,
-						(float32(z) - center) * scale,
-					}
-					model := mgl32.Translate3D(pos.Y(), pos.Z(), pos.X()).Mul4(
-						mgl32.Scale3D(scale, scale, scale),
-					)
-
-					r.cube.DrawAt(r.shader, color, lightDir, model)
+				if !grid.Hit(x, y, z) {
+					continue
 				}
 
+				pos := mgl32.Vec3{
+					(float32(x) - center) * scale,
+					(float32(y) - center) * scale,
+					(float32(z) - center) * scale,
+				}
+				model := mgl32.Translate3D(pos.Y(), pos.Z(), pos.X()).Mul4(
+					mgl32.Scale3D(scale, scale, scale),
+				)
+
+				r.cube.DrawAt(r.shader, color, lightDir, model)
 			}
 		}
 	}
-}
-
-var dirs = []struct {
-	dx, dy, dz int
-}{
-	{1, 0, 0},
-	{0, 1, 0},
-	{0, 0, 1},
-	{-1, 0, 0},
-	{0, -1, 0},
-	{0, 0, -1},
 }

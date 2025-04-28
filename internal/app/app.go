@@ -20,7 +20,7 @@ const (
 	WindowWidth = 1600.
 	WindowHeigh = 1200.
 	Aspect      = WindowWidth / WindowHeigh
-	Period      = time.Second / 2
+	Period      = time.Second * 2
 )
 
 type App struct {
@@ -130,6 +130,8 @@ func (a *App) Run() {
 					dy := e.YRel
 					a.camera.Rotate(float32(dx), float32(dy))
 				}
+			default:
+				sdl.Delay(300)
 			}
 		}
 		grid, err := a.engine.Get()

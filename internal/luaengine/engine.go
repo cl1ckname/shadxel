@@ -38,7 +38,7 @@ func NewLuaEngine(script string, workers int) (*LuaEngine, error) {
 	return &engine, nil
 }
 
-func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
+func (le *LuaEngine) GenerateGridParallel(s, t int) (*voxel.VoxelGrid, error) {
 	size := s * chunkSize
 	half := size / 2
 
@@ -81,7 +81,7 @@ func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
 
 	for res := range results {
 		if res.err != nil {
-			return voxel.VoxelGrid{}, res.err
+			return nil, res.err
 		}
 		for y := 0; y < size; y++ {
 			for x := 0; x < chunkSize; x++ {
@@ -96,10 +96,9 @@ func (le *LuaEngine) GenerateGridParallel(s, t int) (voxel.VoxelGrid, error) {
 		}
 	}
 
-	return voxel.VoxelGrid{
-		Data: final,
-		Size: size,
-	}, nil
+	grid := voxel.NewVoxelGrid(size)
+	grid.Set(final)
+	return grid, nil
 }
 
 func (le *LuaEngine) Close() {

@@ -13,7 +13,7 @@ type Gridgen struct {
 	period time.Duration
 
 	mu      sync.Mutex
-	grid    voxel.VoxelGrid
+	grid    *voxel.VoxelGrid
 	running bool
 	frame   int
 	err     error
@@ -71,7 +71,7 @@ func (g *Gridgen) updateGrid() {
 }
 
 func (g *Gridgen) Get() (voxel.VoxelGrid, error) {
-	return g.grid, g.err
+	return *g.grid, g.err
 }
 
 func (g *Gridgen) Load() error {

@@ -19,10 +19,10 @@ function Draw(x, y, z, t)
 	end
 
 	if isInMenger(x, y, z) then
-		local r = 80 + x * 3
-		local g = 80 + y * 3
-		local b = 80 + z * 3
-		return h.color(255 % 255, g % 255, b % 255)
+		local r = 20 + x * 5
+		local g = 30 + y * 2
+		local b = 10 + z * 9
+		return h.color(r % 255, g % 255, b % 255)
 	end
 
 	return h.null

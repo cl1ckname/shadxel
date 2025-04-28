@@ -57,13 +57,13 @@ This program accepts a few command-line arguments to control its behavior. Optio
 
 ```bash
 # Use default size and workers, run demo/sphere.lua
-./voxelapp sphere
+./bin/shadxel sphere
 
 # Explicitly set grid size to 4x4x4 chunks and use 8 workers
-./voxelapp -size 4 -cpu 8 custom_script
+./bin/shadxel -size 4 -cpu 8 custom_script
 
-# Use default demo if no script is specified
-./voxelapp
+# Use /lua/template.lua if no script is specified
+./bin/shadxel
 ```
 
 ---
