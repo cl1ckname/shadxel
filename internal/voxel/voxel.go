@@ -1,5 +1,7 @@
 package voxel
 
+import "github.com/go-gl/mathgl/mgl32"
+
 type Voxel struct {
 	r, g, b byte
 	visible bool
@@ -24,6 +26,14 @@ func (v Voxel) G() uint8 {
 
 func (v Voxel) B() uint8 {
 	return v.b
+}
+
+func (v Voxel) Color() mgl32.Vec3 {
+	return mgl32.Vec3{
+		float32(v.R()) / 255,
+		float32(v.G()) / 255,
+		float32(v.B()) / 255,
+	}
 }
 
 func (v Voxel) Visible() bool {

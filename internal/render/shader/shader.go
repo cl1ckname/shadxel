@@ -74,17 +74,25 @@ const vertexShaderSource = `
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
-uniform mat4 model;
+// mat4 takes up locations 3, 4, 5, 6
+layout (location = 3) in mat4 instanceModel;
+
+// vec3 color at location 7
+layout (location = 7) in vec3 instanceColor;
+
 uniform mat4 view;
 uniform mat4 projection;
 
 out vec3 FragPos;
 out vec3 Normal;
+out vec3 Color;
 
 void main() {
+    mat4 model = instanceModel;
+
     FragPos = vec3(model * vec4(aPos, 1.0));
-    Normal = mat3(transpose(inverse(model))) * aNormal; // normal in world space
-	Normal = mat3(transpose(inverse(view * model))) * aNormal;
+    Normal = mat3(transpose(inverse(model * view))) * aNormal;
+    Color = instanceColor;
 
     gl_Position = projection * view * vec4(FragPos, 1.0);
 }
@@ -95,17 +103,20 @@ const fragmentShaderSource = `
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec3 Color;
 
 out vec4 FragColor;
 
 uniform vec3 worldLightDir;
-uniform vec3 color;
 
 void main() {
-    float diff = max(dot(normalize(Normal), worldLightDir), 0.0);
-	vec3 ambient = 0.2 * color;
-	vec3 shadedColor = ambient + color * diff;
+    float diff = max(dot(normalize(Normal), normalize(worldLightDir)), 0.0);
+    vec3 ambient = 0.2 * Color;
+    vec3 shadedColor = ambient + Color * diff;
 
     FragColor = vec4(shadedColor, 1.0);
+	// FragColor = vec4(normalize(Normal) * 0.5 + 0.5, 1.0);
+	// FragColor = vec4(normalize(worldLightDir) * 0.5 + 0.5, 1.0);
+	
 }
 ` + "\x00"
