@@ -1,4 +1,6 @@
-function Draw(x, y, t)
+h = require("helpers")
+
+function Draw(x, y, z, t)
 	-- Background
 	local r, g, b = 150, 200, 255
 
@@ -25,5 +27,5 @@ function Draw(x, y, t)
 		r, g, b = 0, 0, 0
 	end
 
-	return r, g, b
+	return h.color(r, g, b)
 end

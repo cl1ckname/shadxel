@@ -10,12 +10,16 @@ import (
 var (
 	sizeFlag = flag.Int("size", 0, "Number of chanks in every axis. Chunk size is 16 voxels.")
 	cpuFlag  = flag.Int("cpu", 0, "Number of parallel workers to call lua")
+	width    = flag.Int("w", 800, "Width of the window on startup")
+	height   = flag.Int("h", 600, "Height of the window on startup")
 )
 
 type Config struct {
 	Script  string
 	Size    int
 	Workers int
+	Width   int32
+	Height  int32
 }
 
 func ParseConfig() Config {
@@ -26,6 +30,8 @@ func ParseConfig() Config {
 		Script:  script(),
 		Workers: cpu(s),
 		Size:    s,
+		Width:   int32(*width),
+		Height:  int32(*height),
 	}
 }
 

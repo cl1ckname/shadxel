@@ -39,7 +39,7 @@ Sure! Here's a clean **README** section you can add under something like `## Com
 
 ### 🧰 Command-Line Options
 
-This program accepts a few command-line arguments to control its behavior. Options should be passed **before** the Lua script name.
+This program accepts a few command-line arguments to control its behavior.
 
 ### 📋 Available Flags
 
@@ -47,6 +47,8 @@ This program accepts a few command-line arguments to control its behavior. Optio
 |--------------|--------|-----------------------------------------------------------|-------------------|
 | `-size`      | int    | Number of chunks per axis (grid size = `size × 32`)       | `2`               |
 | `-cpu`       | int    | Number of Lua workers to run in parallel                  | Half of CPU cores |
+| `-w`       | int    | Width of the window on startupn px                  | 800 |
+| `-h`       | int    | Height of the window on startupn px                  | 600 |
 | *positional* | string | Path to a `.lua` script (omit extension or folder prefix) | `demo/demo.lua`   |
 
 > 📝 Positional script argument should **not** include `demo/` or `.lua`. Just provide the script name (e.g., `sphere` for `demo/sphere.lua`).

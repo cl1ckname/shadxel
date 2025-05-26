@@ -16,11 +16,8 @@ import (
 )
 
 const (
-	Version     = "0.0.1"
-	WindowWidth = 1600.
-	WindowHeigh = 1200.
-	Aspect      = WindowWidth / WindowHeigh
-	Period      = time.Second * 2
+	Version = "0.0.1"
+	Period  = time.Second * 2
 )
 
 type App struct {
@@ -51,7 +48,7 @@ func NewApp(c config.Config) (*App, error) {
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_MINOR_VERSION, 3)
 	sdl.GLSetAttribute(sdl.GL_CONTEXT_PROFILE_MASK, sdl.GL_CONTEXT_PROFILE_CORE)
 
-	window, err := sdl.CreateWindow("Shadxel", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, WindowWidth, WindowHeigh, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
+	window, err := sdl.CreateWindow("Shadxel", sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED, c.Width, c.Height, sdl.WINDOW_OPENGL|sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +68,8 @@ func NewApp(c config.Config) (*App, error) {
 	}
 	gg := gridgen.New(lua, c.Size, Period)
 
-	renderer, err := render.NewRenderer(2./float32(c.Size)/16, Aspect)
+	aspect := float32(c.Width) / float32(c.Height)
+	renderer, err := render.NewRenderer(2./float32(c.Size)/16, aspect)
 	if err != nil {
 		return nil, err
 	}

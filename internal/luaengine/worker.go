@@ -36,6 +36,10 @@ func NewWorkerFromState(L *lua.LState, script string) (*Worker, error) {
 	if err := L.DoString(fallbackRegionWrap); err != nil {
 		return nil, fmt.Errorf("failed to inject DrawRegion fallback: %w", err)
 	}
+	draw := L.GetGlobal("Draw")
+	if draw.Type() != lua.LTFunction {
+		return nil, fmt.Errorf("Draw(x,y,z,t) function not found in Lua")
+	}
 
 	fn := L.GetGlobal("DrawRegion")
 	if fn.Type() != lua.LTFunction {
