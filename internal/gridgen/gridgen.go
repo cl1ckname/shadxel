@@ -70,8 +70,8 @@ func (g *Gridgen) updateGrid() {
 	g.frame++
 }
 
-func (g *Gridgen) Get() (voxel.VoxelGrid, error) {
-	return *g.grid, g.err
+func (g *Gridgen) Get() (*voxel.VoxelGrid, error) {
+	return g.grid, g.err
 }
 
 func (g *Gridgen) Load() error {

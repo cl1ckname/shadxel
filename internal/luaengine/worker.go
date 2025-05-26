@@ -103,10 +103,10 @@ func (w *Worker) GenerateRegion(x0, y0, z0, x1, y1, z1, t int) (voxel.Grid, erro
 			grid[y][x] = make([]voxel.Voxel, sz)
 		}
 	}
-	// voxelCount := xSize * ySize * zSize
-	// if table.Len() != voxelCount*4 {
-	// 	return nil, fmt.Errorf("expected %d items, got %d", voxelCount*4, table.Len())
-	// }
+	voxelCount := sx * sy * sz
+	if table.Len() != voxelCount {
+		return nil, fmt.Errorf("expected %d items, got %d", voxelCount, table.Len())
+	}
 
 	i := 1
 	for y := 0; y < sy; y++ {

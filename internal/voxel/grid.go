@@ -39,6 +39,7 @@ func (v *VoxelGrid) Set(g Grid) {
 				for _, dir := range dirs {
 					nx, ny, nz := x+dir.dx, y+dir.dy, z+dir.dz
 					if !v.InBounds(nx, ny, nz) {
+						v.Mask[z][y][x] = true
 						continue
 					}
 					if v.At(nx, ny, nz).Visible() {

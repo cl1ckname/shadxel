@@ -137,8 +137,11 @@ func (a *App) Run() {
 			log.Println("error", err)
 			return
 		}
+		if grid == nil {
+			continue
+		}
 		view := a.camera.ViewMatrix()
-		a.renderer.Draw(grid, view)
+		a.renderer.Draw(*grid, view)
 		a.window.GLSwap()
 	}
 }
