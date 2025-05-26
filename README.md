@@ -1,3 +1,5 @@
+![image](assets/head.webp)
+
 # 🌟 Shadxel
 
 **Shadxel** is a 3D voxel visualizer and scripting playground written in Go, powered by OpenGL and Lua.  
